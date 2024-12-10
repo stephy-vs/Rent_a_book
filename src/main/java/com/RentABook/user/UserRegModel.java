@@ -3,6 +3,8 @@ package com.RentABook.user;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Entity
 @Table(name = "user_Reg")
@@ -52,5 +54,11 @@ public class UserRegModel
 
     @Column(name = "Status")
     private boolean Status;
+
+    @Column(name = "createdTime")
+    private LocalDateTime createdTime;
+
+    @Column(name = "updatedTime")
+    private LocalDateTime updatedTime;
 
 }

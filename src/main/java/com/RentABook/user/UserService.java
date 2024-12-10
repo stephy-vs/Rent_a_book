@@ -16,7 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -66,6 +68,7 @@ public class UserService {
         user.setLongitude(longitude);
         user.setStatus(false);
         user.setPaymentId(null);
+        user.setCreatedTime(LocalDateTime.now());
       return userRepository.save(user);
 
     }
@@ -99,7 +102,7 @@ public class UserService {
                 otpDetails.setEmail(userEmailId);
                 otpRepo.save(otpDetails);
                 emailServices.sendEmail(userEmailId,subject,body);
-                return new ResponseEntity<>("Verification code is send to the registered mail Id"+userEmailId,HttpStatus.OK);
+                return new ResponseEntity<>("Verification code is send to the registered mail Id. email : "+userEmailId,HttpStatus.OK);
             }
         }catch (Exception e){
             return errorService.handlerException(e);
@@ -107,7 +110,7 @@ public class UserService {
     }
 
     public ResponseEntity<?> otpVerification(String email, Long otp) {
-        Optional<OTPDetails> otpDetailsOptional = otpRepo.findByEmailAndOtp(email,otp);
+        Optional<OTPDetails> otpDetailsOptional = otpRepo.findByEmail(email);
         if (otpDetailsOptional.isPresent()){
             OTPDetails otpDetails = otpDetailsOptional.get();
             LocalTime otpGenTime = otpDetails.getGeneratedTime();
@@ -116,16 +119,20 @@ public class UserService {
             Duration duration = Duration.between(otpGenTime,currentTime);
             long minutes = duration.toMinutes();
             if (minutes<=10){
-                otpDetails.setVerified(true);
-                otpRepo.save(otpDetails);
-                return new ResponseEntity<>("OTP verified successfully",HttpStatus.OK);
+                if (otpDetails.getOtp().equals(otp)){
+                    otpDetails.setVerified(true);
+                    otpRepo.save(otpDetails);
+                    return new ResponseEntity<>("OTP verified successfully",HttpStatus.OK);
+                }else {
+                    return new ResponseEntity<>(ConstantData.Invalid_Data+" OTP",HttpStatus.BAD_REQUEST);
+                }
             }else {
                 otpDetails.setVerified(false);
                 otpRepo.save(otpDetails);
-                return new ResponseEntity<>(ConstantData.Invalid_Data+" OTP expired",HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(ConstantData.Invalid_Data+" : OTP expired",HttpStatus.NOT_FOUND);
             }
         }else {
-            return new ResponseEntity<>(ConstantData.Invalid_Data+" Invalid OTP",HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ConstantData.Invalid_Data+" : emailId",HttpStatus.BAD_REQUEST);
         }
     }
 }

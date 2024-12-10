@@ -1,5 +1,7 @@
 package com.RentABook.user;
 
+import com.RentABook.OTP.OTPDetails;
+import com.RentABook.OTP.OTPRepo;
 import com.RentABook.utilPack.ConstantData;
 import com.RentABook.utilPack.ErrorService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalTime;
+import java.util.List;
 
 @CrossOrigin
 @RestController
@@ -23,6 +28,8 @@ public class UserController
     private ConstantData constantData;
     @Autowired
     private ErrorService errorService;
+    @Autowired
+    private OTPRepo otpRepo;
 
     @PostMapping(path = "/UserReg")
     public ResponseEntity<?> register( @RequestParam("name") String name,
@@ -77,6 +84,18 @@ public class UserController
     @PostMapping(path = "/verifyOTP")
     public ResponseEntity<?> otpVerification(@RequestParam String email,@RequestParam Long otp){
         try {
+            List<OTPDetails> otpDetailsList = otpRepo.findAll();
+            if (!otpDetailsList.isEmpty()){
+                for (OTPDetails otpDetails:otpDetailsList){
+                    LocalTime genTime = otpDetails.getGeneratedTime();
+                    LocalTime currentTime = LocalTime.now();
+                    Duration duration = Duration.between(genTime,currentTime);
+                    long minutes = duration.toMinutes();
+                    if (minutes>10){
+                        otpRepo.delete(otpDetails);
+                    }
+                }
+            }
             return userService.otpVerification(email,otp);
         }catch (Exception e){
             return errorService.handlerException(e);
