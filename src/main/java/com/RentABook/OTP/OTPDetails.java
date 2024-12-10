@@ -3,6 +3,7 @@ package com.RentABook.OTP;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Data
@@ -21,7 +22,7 @@ public class OTPDetails {
     private Long otp;
 
     @Column(name = "generatedTime")
-    private LocalTime generatedTime;
+    private LocalDateTime generatedTime;
 
     @Column(name = "isVerified")
     private boolean isVerified;

@@ -98,7 +98,7 @@ public class UserService {
                 String body = otp+" This OTP is valid for only next 10 minutes.";
                 OTPDetails otpDetails = new OTPDetails();
                 otpDetails.setOtp(otp);
-                otpDetails.setGeneratedTime(LocalTime.now());
+                otpDetails.setGeneratedTime(LocalDateTime.now());
                 otpDetails.setEmail(userEmailId);
                 otpRepo.save(otpDetails);
                 emailServices.sendEmail(userEmailId,subject,body);
@@ -113,8 +113,8 @@ public class UserService {
         Optional<OTPDetails> otpDetailsOptional = otpRepo.findByEmail(email);
         if (otpDetailsOptional.isPresent()){
             OTPDetails otpDetails = otpDetailsOptional.get();
-            LocalTime otpGenTime = otpDetails.getGeneratedTime();
-            LocalTime currentTime = LocalTime.now();
+            LocalDateTime otpGenTime = otpDetails.getGeneratedTime();
+            LocalDateTime currentTime = LocalDateTime.now();
 
             Duration duration = Duration.between(otpGenTime,currentTime);
             long minutes = duration.toMinutes();

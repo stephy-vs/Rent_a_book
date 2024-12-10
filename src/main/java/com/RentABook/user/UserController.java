@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -87,8 +88,8 @@ public class UserController
             List<OTPDetails> otpDetailsList = otpRepo.findAll();
             if (!otpDetailsList.isEmpty()){
                 for (OTPDetails otpDetails:otpDetailsList){
-                    LocalTime genTime = otpDetails.getGeneratedTime();
-                    LocalTime currentTime = LocalTime.now();
+                    LocalDateTime genTime = otpDetails.getGeneratedTime();
+                    LocalDateTime currentTime = LocalDateTime.now();
                     Duration duration = Duration.between(genTime,currentTime);
                     long minutes = duration.toMinutes();
                     if (minutes>10){
